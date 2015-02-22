@@ -138,6 +138,11 @@ public class Androlib {
         mAndRes.decodeManifestWithResources(resTable, apkFile, outDir);
     }
 
+    public void decodeManifestWithResources(ExtFile apkFile, OutputStream out, ResTable resTable)
+            throws AndrolibException {
+        mAndRes.decodeManifestWithResources(resTable, apkFile, out);
+    }
+
     public void decodeRawFiles(ExtFile apkFile, File outDir)
             throws AndrolibException {
         LOGGER.info("Copying assets and libs...");

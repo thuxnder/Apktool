@@ -29,6 +29,7 @@ import com.google.common.base.Strings;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -292,6 +293,10 @@ public class ApkDecoder {
         } catch (DirectoryException ex) {
             throw new AndrolibException(ex);
         }
+    }
+
+    public void extractManifest(OutputStream out) throws AndrolibException {
+        mAndrolib.decodeManifestWithResources(mApkFile, out, getResTable());
     }
 
     public final static short DECODE_SOURCES_NONE = 0x0000;

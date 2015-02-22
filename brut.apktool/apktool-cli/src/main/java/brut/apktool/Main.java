@@ -24,6 +24,7 @@ import brut.common.BrutException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.logging.*;
 
 import brut.directory.DirectoryException;
@@ -88,6 +89,9 @@ public class Main {
                 cmdFound = true;
             } else if (opt.equalsIgnoreCase("publicize-resources")) {
                 cmdPublicizeResources(commandLine);
+                cmdFound = true;
+            } else if (opt.equalsIgnoreCase("e") || opt.equalsIgnoreCase("extract")) {
+                cmdExtract(commandLine);
                 cmdFound = true;
             }
         }
@@ -425,6 +429,37 @@ public class Main {
         allOptions.addOption(originalOption);
         allOptions.addOption(verboseOption);
         allOptions.addOption(quietOption);
+    }
+
+    private static void cmdExtract(CommandLine cli) {
+        //We don't want any output for data extraction
+        Verbosity verbosity = Verbosity.QUIET;
+        setupLogging(verbosity);
+
+        int paraCount = cli.getArgList().size();
+        String apkName = (String) cli.getArgList().get(paraCount - 1);
+        ApkDecoder decoder = new ApkDecoder(new File(apkName));
+
+        // check for options
+        if (cli.hasOption("m") || cli.hasOption("manifest")) {
+            try {
+                OutputStream out = new OutputStream() {
+                    @Override
+                    public void write(int i) throws IOException {
+                        System.out.write(i);
+                    }
+
+                    @Override
+                    public void flush() throws IOException {
+                        super.flush();
+                        System.out.flush();
+                    }
+                };
+                decoder.extractManifest(out);
+            } catch (AndrolibException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private static String verbosityHelp() {

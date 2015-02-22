@@ -160,7 +160,9 @@ final public class AndrolibResources {
             out = new FileDirectory(outDir);
 
             LOGGER.info("Decoding AndroidManifest.xml with only framework resources...");
-            fileDecoder.decodeManifest(inApk, "AndroidManifest.xml", out, "AndroidManifest.xml");
+            InputStream inStream = inApk.getFileInput("AndroidManifest.xml");
+            OutputStream outStream  = out.getFileOutput("AndroidManifest.xml");
+            fileDecoder.decodeManifest(inStream, outStream);
 
         } catch (DirectoryException ex) {
             throw new AndrolibException(ex);
@@ -291,7 +293,9 @@ final public class AndrolibResources {
             out = new FileDirectory(outDir);
             LOGGER.info("Decoding AndroidManifest.xml with resources...");
 
-            fileDecoder.decodeManifest(inApk, "AndroidManifest.xml", out, "AndroidManifest.xml");
+            InputStream inStream = inApk.getFileInput("AndroidManifest.xml");
+            OutputStream outStream  = out.getFileOutput("AndroidManifest.xml");
+            fileDecoder.decodeManifest(inStream, outStream);
 
             // Remove versionName / versionCode (aapt API 16)
             if (!resTable.getAnalysisMode()) {
@@ -304,6 +308,23 @@ final public class AndrolibResources {
                 remove_manifest_versions(outDir.getAbsolutePath() + File.separator + "AndroidManifest.xml");
                 mPackageId = String.valueOf(resTable.getPackageId());
             }
+        } catch (DirectoryException ex) {
+            throw new AndrolibException(ex);
+        }
+    }
+
+    public void decodeManifestWithResources(ResTable resTable, ExtFile apkFile, OutputStream out)
+            throws AndrolibException {
+
+        Duo<ResFileDecoder, AXmlResourceParser> duo = getResFileDecoder();
+        ResFileDecoder fileDecoder = duo.m1;
+        ResAttrDecoder attrDecoder = duo.m2.getAttrDecoder();
+
+        attrDecoder.setCurrentPackage(resTable.listMainPackages().iterator().next());
+
+        try {
+            InputStream inStream = apkFile.getDirectory().getFileInput("AndroidManifest.xml");
+            fileDecoder.decodeManifest(inStream, out);
         } catch (DirectoryException ex) {
             throw new AndrolibException(ex);
         }
